@@ -6,6 +6,6 @@
   :license  "MIT License"
   :version "0.0.1"
   :serial t
-  :depends-on (cl-jpeg trivial-main-thread cl-glfw3 cl-opengl)
+  :depends-on (cl-jpeg trivial-main-thread cl-glfw3 cl-opengl sdl2)
   :components ((:file "package")
                (:file "dip")))
