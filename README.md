@@ -2,7 +2,7 @@
 Digital image processing library.
 
 ## Install
-Make sure `glfw` and `OpenGL` is installed, as they are used to display image.
+Make sure `GLFW` and `OpenGL` are installed, as they are used to display image.
 ``` shell
 $ cd ~/quicklisp/local-projects
 $ git clone https://github.com/sparkecho/dip.git
