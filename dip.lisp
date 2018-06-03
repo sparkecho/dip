@@ -282,7 +282,7 @@ void main()
     image))
 
 (defun convert (image method)
-  (case method
+  (ecase method
     (:rgb->bgr (bgr<->rgb image))
     (:bgr->rgb (bgr<->rgb image))))
 
