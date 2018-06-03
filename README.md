@@ -36,11 +36,11 @@ CL-USER> (dip:convert *img* :bgr->rgb)
 CL-USER> (dip:imwrite "~/fliped_lena.jpg" *img*)
 ```
 ## Declaration
-This project is active updating, any part of this project may change. Becareful to use it in your project, no supportion is provided.
+This project is actively updating, any part of this project may change. Becareful to use it in your project, no supportion is provided.
 
 Issues are welcome, but PRs are too early to receive.
 
 ## Progress
-This project only supports reading and writing `jpeg` format right now. Support of `png` format will be added soon.
+This project only supports reading and writing `jpeg` format right now. Supportion of `png` format will be added soon.
 
-`GLFW` is the only usable backend of `imshow`, `SDL2` will added soon.
+So far `GLFW` is the only usable backend of `imshow`, `SDL2` backend is going to be added.
