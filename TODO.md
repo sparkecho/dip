@@ -24,5 +24,12 @@
 - [x] SDL2
 - [ ] CLX
 - [ ] win32-api
+## Video io supportion
+- [ ] avi
+- [ ] mp4
+- [ ] camera
+  - [ ] v4l2
+## Features to add
+- [ ] Live coding supportion (special version of `imshow`)
 ## Add unit test
 ## Add examples
