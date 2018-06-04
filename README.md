@@ -4,10 +4,12 @@ Digital image processing library.
 ## Install
 Make sure `GLFW` and `OpenGL` are installed, as they are used to display image.
 To display an image you can choose from different backends, different dependents are required respectly:
+
 | Backends | Dependents           |
 | -------- |--------------------- |
 | GLFW3    | GLFW3, OpenGL(> 3.3) |
 | SDL2     | SDL2                 |
+
 ``` shell
 $ cd ~/quicklisp/local-projects
 $ git clone https://github.com/sparkecho/dip.git
