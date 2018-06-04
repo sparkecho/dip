@@ -13,7 +13,7 @@
 - [ ] Add foreign allocated image class
 ## Image format supportion
 - [x] JPG (JPEG)
-- [ ] PNG
+- [x] PNG
 - [ ] BMP
 - [ ] GIF
 - [ ] PDF
