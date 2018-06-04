@@ -134,11 +134,11 @@
         (gl:viewport 0 0 width height)
         ;; Compile shaders and use the program
         (setup-shader)
-
-        ;; render loop
+        ;; Render
+        (render vao texture)
+        ;; Show on screen
+        (glfw:swap-buffers)
         (loop until (glfw:window-should-close-p)
-           do (render vao texture)
-           do (glfw:swap-buffers)
            do (glfw:poll-events))))))
 
 
@@ -252,7 +252,10 @@ void main()
                       (let ((screen-surface (sdl2:get-window-surface window)))
                         (sdl2:blit-surface surface nil screen-surface nil)
                         (sdl2:update-window window)
-                        (sdl2:delay 10000))))))
+                        (sdl2:with-event-loop (:method :poll)
+                          (:quit () t)
+                          (:idle ()
+                                 (sdl2:delay 100))))))))
 
 
 
