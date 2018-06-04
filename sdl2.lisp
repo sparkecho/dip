@@ -6,10 +6,14 @@
   (let* ((width (width image))
          (height (height image))
          (vector (array-storage-vector image))
-         ;; (surface (sdl2:create-rgb-surface width height 24)) ;BGR
-         ;; (surface (sdl2:create-rgb-surface width height 32)) ;ABGR
-         (surface (sdl2:create-rgb-surface width height 24 :b-mask #xff0000 :g-mask #x00ff00 :r-mask #x0000ff)) ;RGB
-         ;; (surface (sdl2:create-rgb-surface width height 32 :a-mask #xff000000 :b-mask #x00ff0000 :g-mask #x0000ff00 :r-mask #x000000ff)) ;RGBA
+         #+big-endian
+         (surface (sdl2:create-rgb-surface width height 24))
+         #+little-endian
+         (surface (sdl2:create-rgb-surface width height 24 :b-mask #xff0000 :g-mask #x00ff00 :r-mask #x0000ff))
+         ;; #+big-endian
+         ;; (surface (sdl2:create-rgb-surface width height 32))
+         ;; #+little-endian
+         ;; (surface (sdl2:create-rgb-surface width height 32 :a-mask #xff000000 :b-mask #x00ff0000 :g-mask #x0000ff00 :r-mask #x000000ff))
          (pixels (sdl2:surface-pixels surface)))
     (dotimes (i (length vector))
       (setf (cffi:mem-aref pixels :uint8 i) (aref vector i)))
