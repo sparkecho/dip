@@ -62,6 +62,9 @@ CL-USER> (dip:imwrite "~/fliped_lena.jpg" *img*)
 ## Declaration
 This project is actively updating, any part of this project may change. Becareful to use it in your project, no supportion is provided.
 
+If you seek a much more mature image processing library, have a look at [opticl](https://github.com/slyrus/opticl).
+They did a great job, this project also inspired and borrowed much from it.
+
 Issues are welcome, but PRs are too early to receive.
 
 ## Progress
