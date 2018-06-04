@@ -14,4 +14,5 @@
            #:array3d->2d
            #:convert
            #:copy
-           #:flip))
+           #:flip
+           #:*default-backend*))
