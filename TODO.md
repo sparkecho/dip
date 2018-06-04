@@ -1,10 +1,11 @@
 # TODO
 
 ## Modularization
-- [ ] Move `imread` and `imwrite` to `io.lisp`
-- [ ] Move `imshow` to `gui.lisp`
-- [ ] Move image creation related code to `image.lisp`
-- [ ] Reserve image processing related code in `dip.lisp`
+- [x] Move `imread` and `imwrite` to `io.lisp`
+- [x] Move `imshow` to `gui.lisp`
+- [x] Move image creation related code to `image.lisp`
+- [x] Reserve image processing related code in `dip.lisp`
+- [ ] Separate image format related io functions from `io.lisp` to other files
 ## Optimization
 - [ ] Implement specific functions to each type of image
 - [ ] Use declarations to optimize
