@@ -29,11 +29,11 @@ CL-USER> (defparameter *img* (dip:imread "~/quicklisp/local-projects/dip/data/le
 
 ```
 
-In this project `imshow` use `glfw3` backend by default, but you can change it by specify the `:backend` keyword or set `dip:*default-backend*` variable.
+In this project `imshow` use `glfw3` backend by default, but you can change it by provid the `backend` parameter (Note that you cannot only provide the `backend` parameter without providing the `title` parameter.) or set the special variable `dip:*default-backend*`.
 For example, to use `sdl2` backend you can either do
 
 ``` common-lisp
-CL-USER> (dip:imshow *img* "lena" :backend :sdl2)
+CL-USER> (dip:imshow *img* "lena" :sdl2)
 ```
 or
 
