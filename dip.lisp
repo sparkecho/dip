@@ -31,16 +31,74 @@
          do (setf (aref dst i) (aref src i))))
     newimage))
 
+
+(defun convert (image method)
+  (ecase method
+    (:rgb->bgr (bgr<->rgb image))
+    (:bgr->rgb (bgr<->rgb image))
+    (:rgb->gray (rgb->gray image))
+    (:gray->rgb (gray->rgb image))))
+
 (defun bgr<->rgb (image)
   (let ((vector (array-storage-vector image)))
     (loop for i below (array-dimension vector 0) by 3
        do (rotatef (aref vector i) (aref vector (+ i 2))))
     image))
 
-(defun convert (image method)
-  (ecase method
-    (:rgb->bgr (bgr<->rgb image))
-    (:bgr->rgb (bgr<->rgb image))))
+(declaim (inline mean3))
+(defun mean3 (a b c)
+  (declare (type unsigned-byte a b c))
+  (the unsigned-byte (truncate (the unsigned-byte (+ a b c)) 3)))
+
+(defun rgb->gray (image)
+  (let* ((gray (make-array (list (rows image) (cols image))
+                           :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector gray)))
+    (loop for i below (length src) by 3
+       for j by 1
+       do (setf (aref dst j) (mean3 (aref src i)
+                                    (aref src (+ i 1))
+                                    (aref src (+ i 2)))))
+    gray))
+
+(defun gray->rgb (image)
+  (let* ((rgb (make-array (list (rows image) (cols image) 3)
+                          :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector rgb)))
+    (loop for i below (length src)
+       for j by 3       
+       for val = (aref src i) then (aref src i)
+       do (setf (aref dst j) val
+                (aref dst (+ j 1)) val
+                (aref dst (+ j 2)) val))
+    rgb))
+
+(defun rgba->rgb (image)
+  (let* ((rgb (make-array (list (rows image) (cols image) 3)
+                          :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector rgb)))
+    (loop for i below (length src) by 4
+       for j by 3
+       do (setf (aref dst j)       (aref src i)
+                (aref dst (+ j 1)) (aref src (+ i 1))
+                (aref dst (+ j 2)) (aref src (+ i 2))))
+    rgb))
+
+(defun rgb->rgba (image)
+  (let* ((rgba (make-array (list (rows image) (cols image) 4)
+                           :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector rgba)))
+    (loop for i below (length src) by 3
+       for j by 4
+       do (setf (aref dst j)       (aref src i)
+                (aref dst (+ j 1)) (aref src (+ i 1))
+                (aref dst (+ j 2)) (aref src (+ i 2))
+                (aref dst (+ j 3)) 255))
+    rgba))
 
 (defun flip (image code)
   (ecase code
