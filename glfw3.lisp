@@ -62,8 +62,7 @@
         (gl:tex-parameter :texture-2d :texture-min-filter :linear)
         (gl:tex-parameter :texture-2d :texture-mag-filter :linear)
         ;; (gl:tex-image-2d :texture-2d 0 :rgb width height 0 :bgr ;show BGR image correctly
-        (gl:tex-image-2d :texture-2d 0 :rgb width height 0
-                         #+little-endian :rgb #+big-endian :bgr
+        (gl:tex-image-2d :texture-2d 0 :rgb width height 0 :rgb
                          :unsigned-byte (array-storage-vector image) :raw t)
         (gl:generate-mipmap :texture-2d)
         (gl:bind-texture :texture-2d 0)
