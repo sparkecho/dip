@@ -3,6 +3,11 @@ Digital image processing library.
 
 ## Install
 Make sure `GLFW` and `OpenGL` are installed, as they are used to display image.
+To display an image you can choose from different backends, different dependents are required respectly:
+| Backends | Dependents           |
+| -------- |--------------------- |
+| GLFW3    | GLFW3, OpenGL(> 3.3) |
+| SDL2     | SDL2                 |
 ``` shell
 $ cd ~/quicklisp/local-projects
 $ git clone https://github.com/sparkecho/dip.git
@@ -19,6 +24,23 @@ CL-USER> (ql:quickload :dip)
 ``` common-lisp
 CL-USER> (defparameter *img* (dip:imread "~/quicklisp/local-projects/dip/data/lena.jpg"))
 *img*
+
+```
+
+In this project `imshow` use `glfw3` backend by default, but you can change it by specify the `:backend` keyword or set `dip:*default-backend*` variable.
+For example, to use `sdl2` backend you can either do
+
+``` common-lisp
+CL-USER> (dip:imshow *img* "lena" :backend :sdl2)
+```
+or
+
+``` common-lisp
+CL-USER> (setf dip:*default-backend* :sdl2)
+CL-USER> (dip:imshow *img* "lena")
+```
+to achive it.
+``` common-lisp
 ;; Display image, but you will find that color is not right.
 CL-USER> (dip:imshow *img* "lena")
 ;; This is because in the result of cl-jpeg channels are arranged as BGR not RGB.
@@ -43,4 +65,4 @@ Issues are welcome, but PRs are too early to receive.
 ## Progress
 This project only supports reading and writing `jpeg` format right now. Supportion of `png` format will be added soon.
 
-So far `GLFW` is the only usable backend of `imshow`, `SDL2` backend is going to be added.
+So far `GLFW` and `SDL2` are supported, more backends will be imported but not resently.
