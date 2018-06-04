@@ -3,7 +3,7 @@
 ## Modularization
 - [ ] Move `imread` and `imwrite` to `io.lisp`
 - [ ] Move `imshow` to `gui.lisp`
-- [ ] Move image creation
+- [ ] Move image creation related code to `image.lisp`
 - [ ] Reserve image processing related code in `dip.lisp`
 ## Optimization
 - [ ] Implement specific functions to each type of image
