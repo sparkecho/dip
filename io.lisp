@@ -1,17 +1,26 @@
 (in-package #:dip)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Input
+(declaim (inline get-imread-fn))
+(defun get-imread-fn (filename)
+  (alexandria:switch ((pathname-type filename) :test #'string=)
+    ("jpeg" #'imread-jpeg)
+    ("jpg"  #'imread-jpeg)))
 
 (defun imread (filename)
-  (multiple-value-bind (buffer height width ncomp)
-      (cl-jpeg:decode-image filename)
-    (make-image height width ncomp buffer)))
+  (funcall (get-imread-fn filename) filename))
 
-;; opticl/jpeg.lisp
-;; (defparameter *rgb-sampling* '((1 1)(1 1)(1 1)))
-;; (defparameter *rgb-q-tabs* (vector jpeg::+q-luminance-hi+
-;;                                    jpeg::+q-chrominance-hi+))
-;; (defparameter *gray-q-tabs* (vector jpeg::+q-luminance+))
-(defun imwrite (filename image)
-  (let ((ncomp (channels image)))
-    (jpeg:encode-image filename (array-storage-vector image)
-                       ncomp (height image) (width image))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Output
+(declaim (inline get-imwrite-fn))
+(defun get-imwrite-fn (filename)
+  (alexandria:switch ((pathname-type filename) :test #'string=)
+    ("jpeg" #'imwrite-jpeg)
+    ("jpg"  #'imwrite-jpeg)))
+
+
+(defun imwrite (filename image &key (force nil))
+  (when force
+    (ensure-directories-exist filename))
+  (funcall (get-imwrite-fn filename) filename image))
