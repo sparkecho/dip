@@ -15,7 +15,10 @@
 ;;;; Reture a vector (1-dimension array) which contains the given array's data
 (declaim (inline array-storage-vector))
 (defun array-storage-vector (array)
-  #+sbcl (sb-ext:array-storage-vector array))
+  #+sbcl (sb-ext:array-storage-vector array)
+  #-sbcl (make-array (array-total-size array)
+                     :element-type (array-element-type array)
+                     :displaced-to array))
 
 ;;;; Query image's basic information
 (declaim (inline height width rows cols channels))
