@@ -4,7 +4,14 @@
   (multiple-value-bind (buffer height width ncomp)
       (cl-jpeg:decode-image filename)
     (if (= ncomp 1)
-        (make-image height width ncomp buffer) ;maybe reimpl to avoid judge ncomp again
+        ;; grayscale image
+        (let* ((image (make-array (list height width)
+                                  :element-type (array-element-type buffer)))
+               (dst (array-storage-vector image)))
+          (loop for i below (length buffer)
+             do (setf (aref dst i) (aref buffer i)))
+          image)
+        ;; RGB truecolor image
         (make-rgb-from-bgr-vec height width buffer))))
 
 (declaim (inline make-rgb-from-bgr-vec))
@@ -22,13 +29,13 @@
 ;; (defparameter *rgb-sampling* '((1 1)(1 1)(1 1)))
 ;; (defparameter *rgb-q-tabs* (vector jpeg::+q-luminance-hi+
 ;;                                    jpeg::+q-chrominance-hi+))
-;; (defparameter *gray-q-tabs* (vector jpeg::+q-luminance+))
+(defparameter *gray-q-tabs* (vector jpeg::+q-luminance+))
 (defun imwrite-jpeg (filename image)
   (let ((channels (channels image))
         (height (height image))
         (width (width image))
         (data (array-storage-vector image)))
-    (cond ((= channels 1) (jpeg:encode-image filename data 1 height width))
+    (cond ((= channels 1) (jpeg:encode-image filename data 1 height width :q-tabs *gray-q-tabs*))
           ((> channels 2) (let ((dst (make-array (* height width 3)
                                                  :element-type (array-element-type image))))
                             (loop for i below (length data) by channels
