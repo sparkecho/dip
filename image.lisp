@@ -4,6 +4,7 @@
 (defgeneric make-image (rows cols channels data &optional element-type)
   (:documentation "Create image object (2d or 3d array)."))
 
+;; (dip::make-image 2 2 2 2) => #3A(((2 2) (2 2)) ((2 2) (2 2)))
 (defmethod make-image (rows cols channels (data number)
                        &optional (element-type '(unsigned-byte 8)))
   (let ((dimensions (if (= channels 1)
@@ -11,6 +12,7 @@
                         (list rows cols channels))))
     (make-array dimensions :element-type element-type :initial-element data)))
 
+;; (dip::make-image 2 2 2 #(1 2)) => #3A(((1 2) (1 2)) ((1 2) (1 2)))
 (defmethod make-image (rows cols channels (data simple-vector)
                        &optional (element-type '(unsigned-byte 8)))
   (assert (= channels (length data)) nil
@@ -25,15 +27,20 @@
              do (setf (aref vector (+ i j)) (svref data j))))
     image))
 
+;; (dip::make-image 2 2 2 #2A((1 2 3 4) (5 6 7 8)) '(unsigned-byte 16))
+;; => #3A(((1 2) (3 4)) ((5 6) (7 8)))
 (defmethod make-image (rows cols channels (data array) &optional element-type)
   (let* ((dimensions (if (= channels 1)
                          (list rows cols)
                          (list rows cols channels)))
          (image (make-array dimensions
                             :element-type (or element-type (array-element-type data))))
-         (vector (array-storage-vector image)))
-    (loop for i below (length data)
-       do (setf (aref vector i) (aref data i)))
+         (src (if (vectorp data)
+                  data
+                  (array-storage-vector data)))
+         (dst (array-storage-vector image)))
+    (loop for i below (length src)
+       do (setf (aref dst i) (aref src i)))
     image))
 
 ;;;; Reture a vector (1-dimension array) which contains the given array's data
