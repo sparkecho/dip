@@ -1,5 +1,7 @@
 (in-package #:dip)
 
+;;;; Acknowledgement
+;;;; This part of code is mainly inspired by: https://gist.github.com/orivej/5522461
 
 (defmacro with-display (host (display screen root-window) &body body)
   `(let* ((,display (xlib:open-display ,host))
@@ -24,8 +26,6 @@
       (unwind-protect
            (handler-case
                (xlib:event-case (display :force-output-p t :discard-p t)
-                 ;; (:exposure () (xlib:put-image window gcontext image :x 0 :y 0))
-                 ;; (t () t))
                  (:key-press () t)
                  (t () (xlib:put-image window gcontext image :x 0 :y 0)))
              (end-of-file ()))
