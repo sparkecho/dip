@@ -5,7 +5,7 @@
 - [x] Move `imshow` to `gui.lisp`
 - [x] Move image creation related code to `image.lisp`
 - [x] Reserve image processing related code in `dip.lisp`
-- [ ] Separate image format related io functions from `io.lisp` to other files
+- [x] Separate image format related io functions from `io.lisp` to other files
 ## Optimization
 - [ ] Implement specific functions to each type of image
 - [ ] Use declarations to optimize
@@ -22,7 +22,7 @@
 ## `imshow` backends
 - [x] GLFW3
 - [x] SDL2
-- [ ] CLX
+- [x] CLX
 - [ ] win32-api
 ## Video io supportion
 - [ ] avi
