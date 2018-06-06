@@ -2,14 +2,6 @@
 Digital image processing library.
 
 ## Install
-Make sure `GLFW` and `OpenGL` are installed, as they are used to display image.
-To display an image you can choose from different backends, different dependents are required respectly:
-
-| Backends | Dependents           |
-| -------- |--------------------- |
-| GLFW3    | GLFW3, OpenGL(> 3.3) |
-| SDL2     | SDL2                 |
-
 ``` shell
 $ cd ~/quicklisp/local-projects
 $ git clone https://github.com/sparkecho/dip.git
@@ -20,6 +12,25 @@ $ git clone https://github.com/sparkecho/dip.git
 ``` common-lisp
 CL-USER> (ql:quickload :dip)
 ```
+
+## Dependencies
+### Common Lisp Libraries
+| Purposes           | Dependencies                      |
+|--------------------|-----------------------------------|
+|Image display       | clx, cl-opengl, cl-glfw3, sdl2    |
+|Image encode/decode | cl-jpeg, pngload, zpng            |
+|Auxiliary           | alexandria                        |
+### Foreign Libraries
+#### Image display
+If you are using UNIX/Linux as CLX backend is supported, you can use clx backend to display image, without any other dependencies.
+Otherwise you need to make sure `GLFW3` and `OpenGL` are installed or `SDL2` is installed, as they are used to display image.
+To display an image you can choose from different backends, different dependencies are required respectly:
+
+| Backends | Dependencies            |
+|----------|-------------------------|
+| GLFW3    | GLFW3, OpenGL(> 3.3)    |
+| SDL2     | SDL2                    |
+| CLX      | None (UNIX/Linux only)  |
 
 ## Example
 
