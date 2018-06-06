@@ -72,6 +72,4 @@ backends to display your image instantly, which make it more ease to use.
 Issues are welcome, but PRs are too early to receive.
 
 ## Progress
-This project only supports reading and writing `jpeg` format right now. Supportion of `png` format will be added soon.
-
-So far `GLFW` and `SDL2` are supported, more backends will be imported but not resently.
+For more information you can look at [TODO list](TODO.md).
