@@ -100,6 +100,30 @@
                 (aref dst (+ j 3)) 255))
     rgba))
 
+(defun rgba<->abgr (image)
+  (let* ((abgr (make-array (array-dimensions image)
+                           :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector abgr)))
+    (loop for i below (length src) by 4
+       do (setf (aref dst i)       (aref src (+ i 3))
+                (aref dst (+ i 1)) (aref src (+ i 2))
+                (aref dst (+ i 2)) (aref src (+ i 1))
+                (aref dst (+ i 3)) (aref src i)))
+    abgr))
+
+(defun rgba->bgra (image)
+  (let* ((bgra (make-array (array-dimensions image)
+                           :element-type (array-element-type image)))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector bgra)))
+    (loop for i below (length src) by 4
+       do (setf (aref dst i)       (aref src (+ i 2))
+                (aref dst (+ i 1)) (aref src (+ i 1))
+                (aref dst (+ i 2)) (aref src i)
+                (aref dst (+ i 3)) (aref src (+ i 3))))
+    bgra))
+
 (defun flip (image code)
   (ecase code
     ((:h :x 0) (flip-horizontal image))
