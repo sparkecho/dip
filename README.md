@@ -65,6 +65,10 @@ This project is actively updating, any part of this project may change. Becarefu
 If you seek a much more mature image processing library, have a look at [opticl](https://github.com/slyrus/opticl).
 They did a great job, this project also inspired and borrowed much from it.
 
+But this project has some advantiges that opticl has not. For example opticl itself does not has any diaplay tools that can help you
+show your image on the screen, you need to write it to file and use an image viewer to check it. But this project contains various
+backends to display your image instantly, which make it more ease to use.
+
 Issues are welcome, but PRs are too early to receive.
 
 ## Progress
