@@ -36,6 +36,12 @@
 ;;;; Mainly inspired by https://github.com/nikki93/lgame/blob/master/game.lisp
 ;;;; Many help from Baggers's tutorials (https://github.com/cbaggers)
 
+(defmacro with-main (&body body)
+  `(sdl2:make-this-thread-main
+    (lambda ()
+      #+sbcl (sb-int:with-float-traps-masked (:invalid) ,@body)
+      #-sbcl ,@body)))
+
 (defun imshow-live (image title &key (delay 100))
   (with-main                            ;try displace this line
     (let* ((width (width image))
@@ -62,11 +68,9 @@
                      (sdl2:update-window window)
                      (sdl2:delay delay)))))))))
 
-(defmacro with-main (&body body)
-  `(sdl2:make-this-thread-main
-    (lambda ()
-      #+sbcl (sb-int:with-float-traps-masked (:invalid) ,@body)
-      #-sbcl ,@body)))
+(defun get-server-connection ()
+  (or swank::*emacs-connection*
+      (swank::default-connection)))
 
 (defmacro continuable (&body body)
   "Allow continuing execution from errors."
@@ -77,7 +81,6 @@
   "Handle REPL requests."
   #+swank
   (continuable
-    (let ((connection (or swank::*emacs-connection*
-                          (swank::default-connection))))
+    (let ((connection (get-server-connection)))
       (when connection
         (swank::handle-requests connection t)))))
