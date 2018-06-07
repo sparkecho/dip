@@ -18,11 +18,66 @@
     (dotimes (i (length vector))
       (setf (cffi:mem-aref pixels :uint8 i) (aref vector i)))
     (sdl2:with-init (:video)
-                    (sdl2:with-window (window :title title :w width :h height :flags '(:shown))
-                      (let ((screen-surface (sdl2:get-window-surface window)))
-                        (sdl2:blit-surface surface nil screen-surface nil)
-                        (sdl2:update-window window)
-                        (sdl2:with-event-loop (:method :poll)
-                          (:quit () t)
-                          (:idle ()
-                                 (sdl2:delay 100))))))))
+      (sdl2:with-window (window :title title :w width :h height :flags '(:shown))
+        (let ((screen-surface (sdl2:get-window-surface window)))
+          (sdl2:blit-surface surface nil screen-surface nil)
+          (sdl2:update-window window)
+          (sdl2:with-event-loop (:method :poll)
+            (:quit () t)
+            (:idle ()
+                   (sdl2:delay 100))))))))
+
+(defun close-sdl-window ()
+  (sdl2:push-event :quit))
+
+;;;; Live coding
+
+;;;; Acknowledgement:
+;;;; Mainly inspired by https://github.com/nikki93/lgame/blob/master/game.lisp
+;;;; Many help from Baggers's tutorials (https://github.com/cbaggers)
+
+(defun imshow-live (image title &key (delay 100))
+  (with-main                            ;try displace this line
+    (let* ((width (width image))
+           (height (height image))
+           (vector (array-storage-vector image))
+           #+big-endian
+           (surface (sdl2:create-rgb-surface width height 24))
+           #+little-endian
+           (surface (sdl2:create-rgb-surface width height 24
+                                             :b-mask #xff0000
+                                             :g-mask #x00ff00
+                                             :r-mask #x0000ff))
+           (pixels (sdl2:surface-pixels surface)))
+      (sdl2:with-init (:video)
+        (sdl2:with-window (window :title title :w width :h height :flags '(:shown))
+          (let ((screen-surface (sdl2:get-window-surface window)))
+            (sdl2:with-event-loop (:method :poll)
+              (:quit () t)
+              (:idle ()
+                     (update-swank)
+                     (dotimes (i (length vector))
+                       (setf (cffi:mem-aref pixels :uint8 i) (aref vector i)))
+                     (sdl2:blit-surface surface nil screen-surface nil)
+                     (sdl2:update-window window)
+                     (sdl2:delay delay)))))))))
+
+(defmacro with-main (&body body)
+  `(sdl2:make-this-thread-main
+    (lambda ()
+      #+sbcl (sb-int:with-float-traps-masked (:invalid) ,@body)
+      #-sbcl ,@body)))
+
+(defmacro continuable (&body body)
+  "Allow continuing execution from errors."
+  `(restart-case (progn ,@body)
+     (continue () :report "Continue")))
+
+(defun update-swank ()
+  "Handle REPL requests."
+  #+swank
+  (continuable
+    (let ((connection (or swank::*emacs-connection*
+                          (swank::default-connection))))
+      (when connection
+        (swank::handle-requests connection t)))))
