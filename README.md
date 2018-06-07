@@ -87,5 +87,4 @@ For more information you can look at [TODO list](TODO.md).
 
 ## Troubleshooting
 - Emacs's hints in mini-buffer disappear after used imshow-live
-
-Look at http://techsnuffle.com/2018/04/17/slimeenableconcurrenthints.
+  Look at http://techsnuffle.com/2018/04/17/slimeenableconcurrenthints.
