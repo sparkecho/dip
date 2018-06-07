@@ -200,3 +200,17 @@
 
 (defun rotate (image angle)
   (declare (ignore image angle)))
+
+
+(defun pyr-down (image)
+  (let* ((drows (truncate (rows image) 2))
+         (dcols (truncate (cols image) 2))
+         (dchannels (channels image))
+         (dimage (make-array (list drows dcols dchannels)
+                           :element-type (array-element-type image))))
+    (loop for i below drows
+          do (loop for j below dcols
+                   do (loop for k below dchannels
+                            do (setf (aref dimage i j k)
+                                     (aref image (* i 2) (* j 2) k)))))
+    dimage))
