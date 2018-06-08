@@ -26,7 +26,7 @@
 - [ ] win32-api
 - [ ] Improves efficience of `imshow` (Each call of imshow creates a new context now)
   - [ ] GLFW3
-  - [ ] SDL2
+  - [x] SDL2
   - [ ] CLX
   - [ ] win32-api
 ## Video io supportion
