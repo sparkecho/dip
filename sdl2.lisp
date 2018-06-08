@@ -120,12 +120,12 @@
 (defun close-all-windows ()
   ;; close all windows
   (loop for title being the hash-key in *window-pool*
-        using (hash-value window)
+          using (hash-value window)
         do (sdl2:destroy-window window)
         do (setf (gethash title *window-pool*) nil))
   ;; free all surfaces
   (loop for title being the hash-key in *surface-pool*
-        using (hash-value surface)
+          using (hash-value surface)
         do (sdl2:free-surface surface)
         do (setf (gethash title *surface-pool*) nil))
   t)
@@ -151,8 +151,10 @@
       (setf *sdl2-init-status* t))
     (let* ((window (or (get-window title width height)
                        (put-window title
-                                   (sdl2:create-window :title title :w width :h height :flags '(:shown)))))
-                                   ;; (sdl2:create-window :title title :w width :h height))))
+                                   (sdl2:create-window :title title
+                                                       :w width
+                                                       :h height
+                                                       :flags '(:shown)))))
            (screen-surface (sdl2:get-window-surface window)))
       (sdl2:blit-surface surface nil screen-surface nil)
       (sdl2:update-window window)
