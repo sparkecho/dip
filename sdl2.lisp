@@ -88,7 +88,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Optimize imshow-sdl2
-(defparameter *sdl2-init-status* nil)
 (defparameter *window-pool* (make-hash-table :test #'equalp))
 (defparameter *surface-pool* (make-hash-table :test #'equalp))
 
@@ -117,18 +116,30 @@
 (defun put-surface (title surface)
   (setf (gethash title *surface-pool*) surface))
 
-(defun close-all-windows ()
-  ;; close all windows
+(defun list-all-windows ()
   (loop for title being the hash-key in *window-pool*
           using (hash-value window)
-        do (sdl2:destroy-window window)
-        do (setf (gethash title *window-pool*) nil))
-  ;; free all surfaces
-  (loop for title being the hash-key in *surface-pool*
-          using (hash-value surface)
-        do (sdl2:free-surface surface)
-        do (setf (gethash title *surface-pool*) nil))
-  t)
+        collect (list title window)))
+
+(flet ((%destroy-window (title window)
+         (sdl2:destroy-window window)
+         (remhash title *window-pool*))
+       (%free-surface (title surface)
+         (sdl2:free-surface surface)
+         (remhash title *surface-pool*)))
+
+  (defun destroy-window (title)
+    (let ((surface (gethash title *surface-pool*))
+          (window (gethash title *window-pool*)))
+      (when surface
+        (%free-surface title surface))
+      (when window
+        (%destroy-window title window))))
+
+  (defun destroy-all-windows ()
+    (maphash #'%free-surface *surface-pool*)
+    (maphash #'%destroy-window *window-pool*)))
+
 
 (defun imshow-sdl2-tmp (image title)
   (let* ((width (width image))
@@ -146,9 +157,8 @@
          (pixels (sdl2:surface-pixels surface)))
     (dotimes (i (length vector))
       (setf (cffi:mem-aref pixels :uint8 i) (aref vector i)))
-    (when (null *sdl2-init-status*)
-      (sdl2:init :video)
-      (setf *sdl2-init-status* t))
+    (when (null (sdl2:was-init))
+      (sdl2:init :video))
     (let* ((window (or (get-window title width height)
                        (put-window title
                                    (sdl2:create-window :title title
