@@ -92,11 +92,11 @@
            (screen-surface (sdl2:get-window-surface window)))
       (sdl2:blit-surface surface nil screen-surface nil)
       (sdl2:update-window window)
-      (sdl2:with-event-loop (:method :poll)
-        (:quit () t)
-        (:idle ()
-               (sdl2:delay 100))))))
-
+      ;; (sdl2:with-event-loop (:method :poll)
+      ;;   (:quit () t)
+      ;;   (:idle ()
+      ;;          (sdl2:delay 100))))))
+)))
 
 ;;;; Live coding
 
@@ -135,20 +135,3 @@
                      (sdl2:blit-surface surface nil screen-surface nil)
                      (sdl2:update-window window)
                      (sdl2:delay delay)))))))))
-
-(defun get-server-connection ()
-  (or swank::*emacs-connection*
-      (swank::default-connection)))
-
-(defmacro continuable (&body body)
-  "Allow continuing execution from errors."
-  `(restart-case (progn ,@body)
-     (continue () :report "Continue")))
-
-(defun update-swank ()
-  "Handle REPL requests."
-  #+swank
-  (continuable
-    (let ((connection (get-server-connection)))
-      (when connection
-        (swank::handle-requests connection t)))))
