@@ -29,6 +29,11 @@
   - [x] SDL2
   - [ ] CLX
   - [ ] win32-api
+- [ ] Add multithreading to `imshow`
+  - [ ] GLFW3
+  - [ ] SDL2
+  - [ ] CLX
+  - [ ] win32-api
 ## Video io supportion
 - [ ] avi
 - [ ] mp4
