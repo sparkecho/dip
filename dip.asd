@@ -14,8 +14,9 @@
                (:file "png"   :depends-on ("image"))
                (:file "io"    :depends-on ("jpeg" "png"))
                ;; gui module
+               (:file "live"  :depends-on ("package"))
                (:file "glfw3" :depends-on ("image"))
-               (:file "sdl2"  :depends-on ("image"))
+               (:file "sdl2"  :depends-on ("image" "live"))
                (:file "clx"   :depends-on ("image"))
                (:file "gui"   :depends-on ("glfw3" "sdl2" "clx"))
                ;; dip module
