@@ -46,6 +46,33 @@
   (display-image (make-xlib-image image) :title title))
 
 
+(defun imshow-live-clx (image title)
+  (let ((host ""))
+    (with-display host (display screen root-window)
+      (let* ((window (xlib:create-window :parent root-window
+                                         :x 0 :y 0
+                                         :width (width image)
+                                         :height (height image)
+                                         :event-mask (xlib:make-event-mask
+                                                      :exposure
+                                                      :key-press
+                                                      :button-press)))
+             (gcontext (xlib:create-gcontext :drawable window)))
+        (setf (xlib:wm-name window) title)
+        (format t "~&~A" title)
+        (xlib:map-window window)
+        (unwind-protect
+             (handler-case
+                 (xlib:event-case (display :force-output-p t :discard-p t)                     
+                   (:key-press () t)
+                   (t ()
+                      ;; (update-swank)
+                      (format t "update~%")
+                      (xlib:put-image window gcontext (make-xlib-image image) :x 0 :y 0)))
+               (end-of-file ()))
+          (xlib:destroy-window window))))))
+
+
 ;;;; Other functions (maybe useful in the future)
 
 (defun save-image-as-png (image path)
