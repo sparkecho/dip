@@ -9,6 +9,18 @@
                      :displaced-to array))
 
 
+;; get the interval of a type
+;; e.g. interval of uint8 is [0 255]
+(declaim (inline type-interval))
+(defun type-interval (type)
+  #+sbcl
+  (let ((specifier (sb-kernel:specifier-type type)))
+    (values (sb-kernel:numeric-type-low specifier)
+            (sb-kernel:numeric-type-high specifier)))
+  #-sbcl
+  (error "only support sbcl right now"))
+
+
 ;;;; Image creation
 (defgeneric make-image (rows cols channels data &optional element-type)
   (:documentation "Create image object (2d or 3d array)."))
