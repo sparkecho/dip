@@ -214,3 +214,102 @@
                             do (setf (aref dimage i j k)
                                      (aref image (* i 2) (* j 2) k)))))
     dimage))
+
+
+;; TODO
+;; method:
+;; :center, :top-left(default), :bottom-right, :top-right, :bottom-left
+;; (defun calc-offsets (rows1 cols1 rows2 cols2 method)
+;;   )
+;; (defun calc-row-offset (row1 row2 method)
+;;   )
+;; (defun calc-col-offset (col1 col2 method)
+;;   )
+
+;; border-type:
+;; :constant, :wrap, :replicate, :reflect, :reflect101
+;; TODO: optimize the structure and style of code
+(defun copy-make-border (image top bottom left right
+                         &optional (border-type :reflect101) (value 0))
+  (let* ((rows (rows image))
+         (cols (cols image))
+         (channels (channels image))
+         ;; the row bottom padding begins
+         (bottom-begin (+ rows top))
+         ;; the col right padding begins
+         (right-begin (+ cols left))
+         (dst-rows (+ rows top bottom))
+         (dst-cols (+ cols left right))
+         (dst-image (make-image-from image dst-rows dst-cols :x left :y top)))
+    (declare (ignore channels))
+    (ecase border-type
+      (:reflect101
+       ;; top
+       (loop for i below top
+             do (loop for j from left below right-begin
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (+ top (- top i))
+                                     j))))
+       ;; bottom
+       (loop for i from bottom-begin below dst-rows
+             do (loop for j from left below right-begin
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (- bottom-begin (- i bottom-begin) 2)
+                                     j))))
+       ;; left and right
+       (loop for i from top below right-begin
+             do (loop for j below left
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     i
+                                     (+ left (- left j)))))
+             do (loop for j from right-begin below dst-cols
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     i
+                                     (- right-begin (- j right-begin) 2)))))
+       ;; top left and top right
+       (loop for i below top
+             do (loop for j below left
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (+ top (- top i))
+                                     (+ left (- left j)))))
+             do (loop for j from right-begin below dst-cols
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (+ top (- top i))
+                                     (- right-begin (- j right-begin) 2)))))
+       ;; bottom left and bottom right
+       (loop for i from bottom-begin below dst-rows
+             do (loop for j below left
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (- bottom-begin (- i bottom-begin) 2)
+                                     (+ left (- left j)))))
+             do (loop for j from right-begin below dst-cols
+                      do (setf (aref dst-image i j)
+                               (aref dst-image
+                                     (- bottom-begin (- i bottom-begin) 2)
+                                     (- right-begin (- j right-begin) 2))))))
+      (:reflect :reflect)
+      (:replicate :replicate)
+      (:wrap :wrap)
+      (:constant
+       ;; top, with tl and tr corners
+       (loop for i below top
+             do (loop for j below dst-cols
+                      do (setf (aref dst-image i j) value)))
+       ;; bottom, with bl and br corners
+       (loop for i from bottom-begin below dst-rows
+             do (loop for j below dst-cols
+                      do (setf (aref dst-image i j) value)))
+       ;; left and right
+       (loop for i from top below bottom-begin
+             do (loop for j below left
+                      do (setf (aref dst-image i j) value))
+             do (loop for j from right-begin below dst-cols
+                      do (setf (aref dst-image i j) value)))))
+    dst-image))
