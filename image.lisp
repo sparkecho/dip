@@ -53,6 +53,34 @@
     image))
 
 
+;;;; Query image's basic information
+(declaim (inline height width rows cols channels))
+
+(defun height (image)
+  (array-dimension image 0))
+
+(defun width (image)
+  (array-dimension image 1))
+
+(defun rows (image)
+  (array-dimension image 0))
+
+(defun cols (image)
+  (array-dimension image 1))
+
+(defun channels (image)
+  (if (= (array-rank image) 2)
+      1
+      (array-dimension image 2)))
+
+
+;; make an image that has the same property as the input
+(declaim (inline make-similar))
+(defun make-similar (image)
+  (make-array (array-dimensions image)
+              :element-type (array-element-type image)))
+
+
 ;; copy-method:
 ;; :inner, :outer
 ;; ADD copy-direction: tl, br, center. specify the meaning of x, y
@@ -100,27 +128,9 @@
                                                      (aref image r c k)))))))))
     dst-image))
 
-;;;; Query image's basic information
-(declaim (inline height width rows cols channels))
 
-(defun height (image)
-  (array-dimension image 0))
-
-(defun width (image)
-  (array-dimension image 1))
-
-(defun rows (image)
-  (array-dimension image 0))
-
-(defun cols (image)
-  (array-dimension image 1))
-
-(defun channels (image)
-  (if (= (array-rank image) 2)
-      1
-      (array-dimension image 2)))
-
-
+;; print image in a better format
+;; TODO: support print specified region of image
 (defun print-image (image)
   (let ((width 0)
         (rows (rows image))
