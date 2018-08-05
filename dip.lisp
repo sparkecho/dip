@@ -49,6 +49,7 @@
   (declare (type unsigned-byte a b c))
   (the unsigned-byte (truncate (the unsigned-byte (+ a b c)) 3)))
 
+;; TODO: wrong algorithm, this function needs fix
 (defun rgb->gray (image)
   (let* ((gray (make-array (list (rows image) (cols image))
                            :element-type (array-element-type image)))
@@ -67,7 +68,7 @@
          (src (array-storage-vector image))
          (dst (array-storage-vector rgb)))
     (loop for i below (length src)
-       for j by 3       
+       for j by 3
        for val = (aref src i) then (aref src i)
        do (setf (aref dst j) val
                 (aref dst (+ j 1)) val
@@ -215,6 +216,40 @@
     dimage))
 
 
+;; split an image to a list of images
+;; each element of it is a channel of the image
+(defun split-image (image)
+  (let ((rows (rows image))
+        (cols (cols image))
+        (channels (channels image))
+        (element-type (array-element-type image)))
+    (if (= channels 1)
+        (list image)
+        (loop for k below channels
+              collect (let ((dst (make-array (list rows cols)
+                                             :element-type element-type)))
+                        (loop for i below rows
+                              do (loop for j below cols
+                                       do (setf (aref dst i j)
+                                                (aref image i j k))))
+                        dst)))))
+
+;; merge a list of 2d images to a multi-channel 3d image
+(defun merge-image (image-list)
+  (let* ((img0 (car image-list))
+         (rows (rows img0))
+         (cols (cols img0))
+         (element-type (array-element-type img0))
+         (channels (length image-list))
+         (image (make-array (list rows cols channels)
+                            :element-type element-type)))
+    (loop for img in image-list
+            for k = 0 then (+ k 1)
+            do (loop for i below rows
+                     do (loop for j below cols
+                              do (setf (aref image i j k) (aref img i j)))))
+      image))
+
 ;; TODO
 ;; method:
 ;; :center, :top-left(default), :bottom-right, :top-right, :bottom-left
@@ -320,7 +355,7 @@
 ;; TODO: add multi-channel image support
 ;; TODO: add multi-channel kernel support
 ;; TODO: add more arguments, anchor, delta, border-type
-(defun convolution (image kernel)
+(defun convolution (image kernel &optional (normalize t))
   (let* ((rows (rows image))
          (cols (cols image))
          (kernel-rows (rows kernel))
@@ -332,11 +367,38 @@
                                    pad-rows pad-rows
                                    pad-cols pad-cols))
          (dst-image (make-similar image)))
-    (loop for i below rows
-          do (loop for j below cols
-                   do (let ((sum (loop for ii below kernel-rows
-                                       sum (loop for jj below kernel-cols
-                                                sum (* (aref padded (+ i ii) (+ j jj))
-                                                       (aref kernel ii jj))))))
-                        (setf (aref dst-image i j) (floor (+ (/ sum number) 0.5))))))
+    (multiple-value-bind (low high)
+        (type-interval (array-element-type image))
+      (loop for i below rows
+            do (loop for j below cols
+                     do (let* ((sum (loop for ii below kernel-rows
+                                          sum (loop for jj below kernel-cols
+                                                    sum (* (aref padded (+ i ii) (+ j jj))
+                                                           (aref kernel ii jj)))))
+                               (val (round (if normalize
+                                               (/ sum number)
+                                               sum))))
+                          (setf (aref dst-image i j)
+                                (alexandria:clamp val low high))))))
     dst-image))
+
+;; FP style code
+;; (setf (aref dst-image i j)
+;;       (funcall #'(lambda (val) (alexandria:clamp val low high))
+;;                (funcall #'(lambda (sum) (if normalize
+;;                                             (/ sum number)
+;;                                             sum))
+;;                         (loop for ii below kernel-rows
+;;                               sum (loop for jj below kernel-cols
+;;                                         sum (* (aref padded (+ i ii) (+ j jj))
+;;                                                (aref kernel ii jj)))))))
+
+;; sobel
+;; 3x3 dx
+;; (convolution image #2A((-1 0 1)
+;;                        (-2 0 2)
+;;                        (-1 0 1)))
+;; 3x3 dy
+;; (convolution image #2A((-1 -2 -1)
+;;                        ( 0  0  0)
+;;                        ( 1  2  1)))
