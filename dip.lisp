@@ -23,12 +23,11 @@
     newimage))
 
 (defun copy (image)
-  (let ((newimage (make-array (array-dimensions image)
-                              :element-type (array-element-type image))))
-    (let ((src (array-storage-vector image))
-          (dst (array-storage-vector newimage)))
-      (loop for i below (array-total-size image)
-         do (setf (aref dst i) (aref src i))))
+  (let* ((newimage (make-similar image))
+         (src (array-storage-vector image))
+         (dst (array-storage-vector newimage)))
+    (loop for i below (array-total-size image)
+          do (setf (aref dst i) (aref src i)))
     newimage))
 
 
@@ -228,7 +227,9 @@
 
 ;; border-type:
 ;; :constant, :wrap, :replicate, :reflect, :reflect101
+;; TODO: add multi-channel image support
 ;; TODO: optimize the structure and style of code
+;; TODO: add support when pad size > image size
 (defun copy-make-border (image top bottom left right
                          &optional (border-type :reflect101) (value 0))
   (let* ((rows (rows image))
@@ -259,7 +260,7 @@
                                      (- bottom-begin (- i bottom-begin) 2)
                                      j))))
        ;; left and right
-       (loop for i from top below right-begin
+       (loop for i from top below bottom-begin
              do (loop for j below left
                       do (setf (aref dst-image i j)
                                (aref dst-image
@@ -312,4 +313,30 @@
                       do (setf (aref dst-image i j) value))
              do (loop for j from right-begin below dst-cols
                       do (setf (aref dst-image i j) value)))))
+    dst-image))
+
+
+;; convolution
+;; TODO: add multi-channel image support
+;; TODO: add multi-channel kernel support
+;; TODO: add more arguments, anchor, delta, border-type
+(defun convolution (image kernel)
+  (let* ((rows (rows image))
+         (cols (cols image))
+         (kernel-rows (rows kernel))
+         (kernel-cols (cols kernel))
+         (pad-rows (truncate kernel-rows 2))
+         (pad-cols (truncate kernel-cols 2))
+         (number (array-total-size kernel))
+         (padded (copy-make-border image
+                                   pad-rows pad-rows
+                                   pad-cols pad-cols))
+         (dst-image (make-similar image)))
+    (loop for i below rows
+          do (loop for j below cols
+                   do (let ((sum (loop for ii below kernel-rows
+                                       sum (loop for jj below kernel-cols
+                                                sum (* (aref padded (+ i ii) (+ j jj))
+                                                       (aref kernel ii jj))))))
+                        (setf (aref dst-image i j) (floor (+ (/ sum number) 0.5))))))
     dst-image))
