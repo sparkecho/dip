@@ -362,7 +362,9 @@
          (kernel-cols (cols kernel))
          (pad-rows (truncate kernel-rows 2))
          (pad-cols (truncate kernel-cols 2))
-         (number (array-total-size kernel))
+         (number (if normalize
+                     (array-total-size kernel)
+                     1))
          (padded (copy-make-border image
                                    pad-rows pad-rows
                                    pad-cols pad-cols))
@@ -375,19 +377,17 @@
                                           sum (loop for jj below kernel-cols
                                                     sum (* (aref padded (+ i ii) (+ j jj))
                                                            (aref kernel ii jj)))))
-                               (val (round (if normalize
-                                               (/ sum number)
-                                               sum))))
+                               ;; for element-type is subtype of integer occasion
+                               (val (round (/ sum number))))
                           (setf (aref dst-image i j)
-                                (alexandria:clamp val low high))))))
+                                ;; for element-type is subtype of integer occasion
+                                (clamp val low high))))))
     dst-image))
 
 ;; FP style code
 ;; (setf (aref dst-image i j)
 ;;       (funcall #'(lambda (val) (alexandria:clamp val low high))
-;;                (funcall #'(lambda (sum) (if normalize
-;;                                             (/ sum number)
-;;                                             sum))
+;;                (funcall #'(lambda (sum) (/ sum number))
 ;;                         (loop for ii below kernel-rows
 ;;                               sum (loop for jj below kernel-cols
 ;;                                         sum (* (aref padded (+ i ii) (+ j jj))
