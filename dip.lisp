@@ -49,17 +49,19 @@
   (declare (type unsigned-byte a b c))
   (the unsigned-byte (truncate (the unsigned-byte (+ a b c)) 3)))
 
-;; TODO: wrong algorithm, this function needs fix
+
 (defun rgb->gray (image)
-  (let* ((gray (make-array (list (rows image) (cols image))
-                           :element-type (array-element-type image)))
+  (let* ((element-type (array-element-type image))
+         (gray (make-array (list (rows image) (cols image))
+                           :element-type element-type))
          (src (array-storage-vector image))
          (dst (array-storage-vector gray)))
     (loop for i below (length src) by 3
        for j by 1
-       do (setf (aref dst j) (mean3 (aref src i)
-                                    (aref src (+ i 1))
-                                    (aref src (+ i 2)))))
+       do (setf (aref dst j)
+                (round (+ (* 0.2989 (aref src i))
+                          (* 0.5870 (aref src (+ i 1)))
+                          (* 0.1140 (aref src (+ i 2)))))))
     gray))
 
 (defun gray->rgb (image)
