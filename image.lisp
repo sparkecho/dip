@@ -182,5 +182,6 @@
                     (cond ((equal type '(unsigned-byte 8))
                            #'(lambda (x) (alexandria:clamp (round x) 0 255)))
                           ((subtypep type 'integer) #'round)))
+                   ((subtypep type 'float) #'float)
                    (t #'identity))))
     (copy-value image dst-image fn)))
