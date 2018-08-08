@@ -49,7 +49,7 @@
   (declare (type unsigned-byte a b c))
   (the unsigned-byte (truncate (the unsigned-byte (+ a b c)) 3)))
 
-
+;; TODO: add support while element type of image is float
 (defun rgb->gray (image)
   (let* ((element-type (array-element-type image))
          (gray (make-array (list (rows image) (cols image))
@@ -279,59 +279,118 @@
          (dst-rows (+ rows top bottom))
          (dst-cols (+ cols left right))
          (dst-image (make-image-from image dst-rows dst-cols :x left :y top)))
-    (declare (ignore channels))
     (ecase border-type
       (:reflect101
        ;; top
-       (loop for i below top
-             do (loop for j from left below right-begin
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (+ top (- top i))
-                                     j))))
-       ;; bottom
-       (loop for i from bottom-begin below dst-rows
-             do (loop for j from left below right-begin
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (- bottom-begin (- i bottom-begin) 2)
-                                     j))))
-       ;; left and right
-       (loop for i from top below bottom-begin
-             do (loop for j below left
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     i
-                                     (+ left (- left j)))))
-             do (loop for j from right-begin below dst-cols
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     i
-                                     (- right-begin (- j right-begin) 2)))))
-       ;; top left and top right
-       (loop for i below top
-             do (loop for j below left
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (+ top (- top i))
-                                     (+ left (- left j)))))
-             do (loop for j from right-begin below dst-cols
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (+ top (- top i))
-                                     (- right-begin (- j right-begin) 2)))))
-       ;; bottom left and bottom right
-       (loop for i from bottom-begin below dst-rows
-             do (loop for j below left
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (- bottom-begin (- i bottom-begin) 2)
-                                     (+ left (- left j)))))
-             do (loop for j from right-begin below dst-cols
-                      do (setf (aref dst-image i j)
-                               (aref dst-image
-                                     (- bottom-begin (- i bottom-begin) 2)
-                                     (- right-begin (- j right-begin) 2))))))
+       (when (= channels 1)
+         (loop for i below top
+               do (loop for j from left below right-begin
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (+ top (- top i))
+                                       j))))
+         ;; bottom
+         (loop for i from bottom-begin below dst-rows
+               do (loop for j from left below right-begin
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (- bottom-begin (- i bottom-begin) 2)
+                                       j))))
+         ;; left and right
+         (loop for i from top below bottom-begin
+               do (loop for j below left
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       i
+                                       (+ left (- left j)))))
+               do (loop for j from right-begin below dst-cols
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       i
+                                       (- right-begin (- j right-begin) 2)))))
+         ;; top left and top right
+         (loop for i below top
+               do (loop for j below left
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (+ top (- top i))
+                                       (+ left (- left j)))))
+               do (loop for j from right-begin below dst-cols
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (+ top (- top i))
+                                       (- right-begin (- j right-begin) 2)))))
+         ;; bottom left and bottom right
+         (loop for i from bottom-begin below dst-rows
+               do (loop for j below left
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (- bottom-begin (- i bottom-begin) 2)
+                                       (+ left (- left j)))))
+               do (loop for j from right-begin below dst-cols
+                        do (setf (aref dst-image i j)
+                                 (aref dst-image
+                                       (- bottom-begin (- i bottom-begin) 2)
+                                       (- right-begin (- j right-begin) 2))))))
+       (when (/= channels 1)
+         (loop for k below channels
+               do (loop for i below top
+                        do (loop for j from left below right-begin
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (+ top (- top i))
+                                                j
+                                                k))))
+                  ;; bottom
+               do (loop for i from bottom-begin below dst-rows
+                        do (loop for j from left below right-begin
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (- bottom-begin (- i bottom-begin) 2)
+                                                j
+                                                k))))
+                  ;; left and right
+               do (loop for i from top below bottom-begin
+                        do (loop for j below left
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                i
+                                                (+ left (- left j))
+                                                k)))
+                        do (loop for j from right-begin below dst-cols
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                i
+                                                (- right-begin (- j right-begin) 2)
+                                                k))))
+                  ;; top left and top right
+               do (loop for i below top
+                        do (loop for j below left
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (+ top (- top i))
+                                                (+ left (- left j))
+                                                k)))
+                        do (loop for j from right-begin below dst-cols
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (+ top (- top i))
+                                                (- right-begin (- j right-begin) 2)
+                                                k))))
+                  ;; bottom left and bottom right
+               do (loop for i from bottom-begin below dst-rows
+                        do (loop for j below left
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (- bottom-begin (- i bottom-begin) 2)
+                                                (+ left (- left j))
+                                                k)))
+                        do (loop for j from right-begin below dst-cols
+                                 do (setf (aref dst-image i j k)
+                                          (aref dst-image
+                                                (- bottom-begin (- i bottom-begin) 2)
+                                                (- right-begin (- j right-begin) 2)
+                                                k)))))))
       (:reflect :reflect)
       (:replicate :replicate)
       (:wrap :wrap)
@@ -357,9 +416,11 @@
 ;; TODO: add multi-channel image support
 ;; TODO: add multi-channel kernel support
 ;; TODO: add more arguments, anchor, delta, border-type
+;; use float type to calculate by default
 (defun convolution (image kernel &optional (normalize t))
   (let* ((rows (rows image))
          (cols (cols image))
+         (channels (channels image))
          (kernel-rows (rows kernel))
          (kernel-cols (cols kernel))
          (pad-rows (truncate kernel-rows 2))
@@ -371,19 +432,24 @@
                                    pad-rows pad-rows
                                    pad-cols pad-cols))
          (dst-image (make-similar image)))
-    (multiple-value-bind (low high)
-        (type-interval (array-element-type image))
-      (loop for i below rows
-            do (loop for j below cols
-                     do (let* ((sum (loop for ii below kernel-rows
-                                          sum (loop for jj below kernel-cols
-                                                    sum (* (aref padded (+ i ii) (+ j jj))
-                                                           (aref kernel ii jj)))))
-                               ;; for element-type is subtype of integer occasion
-                               (val (round (/ sum number))))
-                          (setf (aref dst-image i j)
-                                ;; for element-type is subtype of integer occasion
-                                (clamp val low high))))))
+    (if (= channels 1)
+        (loop for i below rows
+              do (loop for j below cols
+                       do (setf (aref dst-image i j)
+                                (/ (loop for ii below kernel-rows
+                                         sum (loop for jj below kernel-cols
+                                                   sum (* (aref padded (+ i ii) (+ j jj))
+                                                          (aref kernel ii jj))))
+                                   number))))
+        (loop for k below channels
+              do (loop for i below rows
+                       do (loop for j below cols
+                                do (setf (aref dst-image i j k)
+                                         (/ (loop for ii below kernel-rows
+                                                  sum (loop for jj below kernel-cols
+                                                            sum (* (aref padded (+ i ii) (+ j jj) k)
+                                                                   (aref kernel ii jj))))
+                                            number))))))
     dst-image))
 
 ;; FP style code
