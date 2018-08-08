@@ -155,3 +155,32 @@
                          do (terpri))
                 do (terpri))))
     (values)))
+
+
+;; fn: cast function, accept 1 arg
+(defun copy-value (src dst &optional (fn #'identity))
+  (let ((rows (rows src))
+        (cols (cols src))
+        (channels (channels src)))
+    (if (= channels 1)
+        (loop for i below rows
+              do (loop for j below cols
+                       do (setf (aref dst i j)
+                                (funcall fn (aref src i j)))))
+        (loop for k below channels
+              do (loop for i below rows
+                       do (loop for j below cols
+                                do (setf (aref dst i j k)
+                                         (funcall fn (aref src i j k)))))))
+    dst))
+
+(defun convert-type (image type)
+  (let* ((element-type (array-element-type image))
+         (dst-image (make-array (array-dimensions image)
+                                :element-type type))
+         (fn (cond ((subtypep element-type 'float)
+                    (cond ((equal type '(unsigned-byte 8))
+                           #'(lambda (x) (alexandria:clamp (round x) 0 255)))
+                          ((subtypep type 'integer) #'round)))
+                   (t #'identity))))
+    (copy-value image dst-image fn)))
