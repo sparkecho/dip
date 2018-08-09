@@ -76,9 +76,9 @@
 
 ;; make an image that has the same property as the input
 (declaim (inline make-similar))
-(defun make-similar (image)
+(defun make-similar (image &optional type)
   (make-array (array-dimensions image)
-              :element-type (array-element-type image)))
+              :element-type (or type (array-element-type image))))
 
 
 ;; copy-method:
