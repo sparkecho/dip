@@ -71,7 +71,7 @@
 
 ;; calculate feature for a pixel
 ;; mag, angle: (image (* *) uint8)
-(defun calc-feature (mag angle table feature)
+(defun feature-pixel (mag angle table feature)
   (let* ((pos (find-pos angle table))
          (l (- pos 1))
          (r (mod pos 9))
@@ -82,23 +82,41 @@
     (incf (aref feature r) (float (* mag ratior)))
     feature))
 
+;; calculate feature vector for a cell
+;; 2d image only
+;; (defparameter mag-cns (split-image magnitude-uint8))
+;; (defparameter ang-cns (split-image direction-uint8))
+;; (feature-cell (car mag-cns) (car ang-cns) table 0 0 8 8)
+(defun feature-cell (magnitude direction table x y rows cols)
+  (let ((feature (make-array 9 :element-type 'single-float :initial-element 0.0)))
+    (loop for i from y below (+ rows y)
+          do (loop for j from x below (+ cols x)
+                   do (feature-pixel (aref magnitude i j)
+                                     (aref direction i j)
+                                     table
+                                     feature)))
+    feature))
+
+;; Step 0 : Load Image
 (defparameter image (imread "../data/lena.jpg"))
+;; Step 1 : Preprocessing
+;; TODO: do cut thing
+
 ;; Step 2 : Calculate the Gradient Images
 (defparameter fimage (convert-type image 'single-float))
 (defparameter gx (sobelx1 fimage))
 (defparameter gy (sobely1 fimage))
-(defparameter mag nil)
-(defparameter angle nil)
-(multiple-value-bind (lmag langle)
+(defparameter magnitude nil)
+(defparameter direction nil)
+(multiple-value-bind (mag dire)
     (cart-to-polar gx gy)
-  (progn (setf mag lmag angle langle) t))
-
-(defparameter mag-uint8 (convert-type mag '(unsigned-byte 8)))
-(defparameter angle-uint8 (rtd-image angle))
-(imshow mag-uint8 "mag")
-(imshow angle-uint8 "angle")
-
-
+  (progn (setf magnitude mag direction dire) t))
+;; Step 3 : Calculate Histogram of Gradients in 8×8 cells
+(defparameter magnitude-uint8 (convert-type magnitude '(unsigned-byte 8)))
+(defparameter direction-uint8 (rtd-image direction))
+(imshow magnitude-uint8 "magnitude")
+(imshow direction-uint8 "direction")
+;; calc a 9-dim feature for every 8x8 cell (no overlapping)
+(feature-cell magnitude-uint8 direction-uint8 table 0 0 8 8)
 
 (destroy-all-windows)
-;; Step 3 : Calculate Histogram of Gradients in 8×8 cells
